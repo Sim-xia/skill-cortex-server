@@ -13,6 +13,7 @@ A third-party MCP server: Enable all IDEs to access Claude Code Skills capabilit
 - **Search Functionality / 搜索功能**: Full-text search across all indexed skills / 对所有索引技能进行全文搜索
 - **Skill Details / 技能详情**: Detailed information retrieval for each skill / 每个技能的详细信息检索
 - **Import Tools / 导入工具**: Built-in script to import skills from public repositories / 内置从公共仓库导入技能的脚本
+- **Built-in Skills from Open Source Projects / 内置开源项目技能**: Includes skills from [agentskills/agentskills](https://github.com/agentskills/agentskills) and [anthropics/skills](https://github.com/anthropics/skills) repositories / 包含来自 agentskills/agentskills 和 anthropics/skills 仓库的技能
 
 ## Prerequisites / 先决条件
 
@@ -188,6 +189,28 @@ Returns the current tags list or operation result / 返回当前标签列表或�
 ## Importing Skills / 导入技能
 
 The project includes a built-in script to import skills from public repositories / 项目包含一个内置脚本，用于从公共仓库导入技能
+
+### Built-in Skills / 内置技能
+
+This project includes skills from the following open-source repositories / 本项目包含以下开源仓库的技能：
+
+#### 1. [agentskills/agentskills](https://github.com/agentskills/agentskills)
+
+A comprehensive collection of AI agent skills and capabilities / 一个全面的 AI 代理技能和能力集合
+
+- **Features / 特性**: Provides a wide range of skills for AI agents, including coding, data analysis, and problem-solving / 为 AI 代理提供广泛的技能，包括编码、数据分析和问题解决
+- **Skill Types / 技能类型**: Coding, debugging, testing, optimization, and more / 编码、调试、测试、优化等
+- **Usage / 用途**: Enhances AI agent capabilities with practical, reusable skills / 通过实用的、可重用的技能增强 AI 代理能力
+
+#### 2. [anthropics/skills](https://github.com/anthropics/skills)
+
+Official skills repository from Anthropic / Anthropic 的官方技能仓库
+
+- **Features / 特性**: Officially maintained skills optimized for Claude AI / 官方维护的针对 Claude AI 优化的技能
+- **Skill Types / 技能类型**: Documentation, code generation, system administration, and more / 文档、代码生成、系统管理等
+- **Usage / 用途**: Provides high-quality, tested skills for production use / 为生产环境提供高质量、经过测试的技能
+
+### Import Script / 导入脚本
 
 ```bash
 # Preview what would be imported / 预览将要导入的内容
