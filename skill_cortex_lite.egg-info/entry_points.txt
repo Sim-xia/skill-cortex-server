@@ -1,2 +1,0 @@
-[console_scripts]
-skill-cortex = skill_cortex.server:main

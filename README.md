@@ -13,7 +13,7 @@ A third-party MCP server: Enable all IDEs to access Claude Code Skills capabilit
 - **Search Functionality / 搜索功能**: Full-text search across all indexed skills / 对所有索引技能进行全文搜索
 - **Skill Details / 技能详情**: Detailed information retrieval for each skill / 每个技能的详细信息检索
 - **Import Tools / 导入工具**: Built-in script to import skills from public repositories / 内置从公共仓库导入技能的脚本
-- **Built-in Skills from Open Source Projects / 内置开源项目技能**: Includes skills from [agentskills/agentskills](https://github.com/agentskills/agentskills) and [anthropics/skills](https://github.com/anthropics/skills) repositories / 包含来自 agentskills/agentskills 和 anthropics/skills 仓库的技能
+- **No Bundled Skills in Repo / 仓库不内置 Skills**: This repository does not ship skills by default; put your skills under `~/.claude/skills` or `./.skills` / 本仓库默认不内置 skills，请将 skills 放到 `~/.claude/skills` 或 `./.skills`
 
 ## Prerequisites / 先决条件
 
@@ -23,7 +23,6 @@ A third-party MCP server: Enable all IDEs to access Claude Code Skills capabilit
 ## Key Technologies / 关键技术
 
 - **MCP (Model Context Protocol)**: For server integration / 用于服务器集成
-- **Pydantic**: For data validation and serialization / 用于数据验证和序列化
 - **Python Standard Library**: File system operations and caching / 文件系统操作和缓存
 
 ## Project Structure / 项目结构
@@ -127,11 +126,11 @@ Returns complete skill information including content, tags, and metadata / 返�
 
 ### 4. update_tags / 更新标签
 
-Manage the allowed tags list / 管理允许的标签列表
+Manage tags inside skills frontmatter / 管理 skills 的 frontmatter tags
 
 **Parameters / 参数:**
-- `mode` (required): Operation mode - "list", "add", "remove", or "update" / 操作模式 - "list"、"add"、"remove" 或 "update"
-- `updates` (optional): Array of tag updates / 标签更新数组
+- `mode` (required): "list" or "apply" / 操作模式："list" 或 "apply"
+- `updates` (optional): required when mode is "apply" / 当 mode 为 "apply" 时需要提供
 
 **Example / 示例:**
 ```json
@@ -142,9 +141,9 @@ Manage the allowed tags list / 管理允许的标签列表
 
 ```json
 {
-  "mode": "add",
+  "mode": "apply",
   "updates": [
-    {"tag": "ai", "description": "Artificial Intelligence"}
+    {"skill_id": "...", "tags": ["python", "mcp"]}
   ]
 }
 ```
@@ -192,7 +191,7 @@ The project includes a built-in script to import skills from public repositories
 
 ### Built-in Skills / 内置技能
 
-This project includes skills from the following open-source repositories / 本项目包含以下开源仓库的技能：
+This repository does not bundle skills by default. Use the import script (optional) to fetch skills from public repositories / 本仓库默认不内置 skills，可使用导入脚本（可选）从公共仓库拉取：
 
 #### 1. [agentskills/agentskills](https://github.com/agentskills/agentskills)
 
@@ -221,6 +220,8 @@ python import_skills.py
 ```
 
 Skills are imported to: `./.skill_cortex_sources/` / 技能导入到：`./.skill_cortex_sources/`
+
+Skills are copied to: `./.skills/imported/` / 技能拷贝到：`./.skills/imported/`
 
 ## Troubleshooting / 故障排除
 
