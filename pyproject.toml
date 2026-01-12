@@ -1,15 +1,44 @@
 [project]
 name = "skill-cortex-lite"
-version = "0.1.0"
-description = "Skill-Cortex (Lite) MCP server"
+version = "0.1.1"
+description = "Skill-Cortex (Lite) MCP server - Enable all IDEs to access Claude Code Skills capabilities"
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
+keywords = ["mcp", "skills", "claude", "ai", "agent"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
-	"mcp>=0.9.0",
+    "mcp>=1.0.0",
+]
+
+[project.optional-dependencies]
+yaml = ["PyYAML>=6.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
 ]
 
 [project.scripts]
 skill-cortex = "skill_cortex.server:main"
 
+[project.urls]
+Homepage = "https://github.com/your-username/skill-cortex-lite"
+Documentation = "https://github.com/your-username/skill-cortex-lite#readme"
+Issues = "https://github.com/your-username/skill-cortex-lite/issues"
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["skill_cortex*"]

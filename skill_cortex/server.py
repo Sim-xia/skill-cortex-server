@@ -72,6 +72,68 @@ def _find_node(tree, path: tuple[str, ...]):
     return node
 
 
+def _apply_max_lines(text: str, max_lines: int | None) -> str:
+    """Truncate text to max_lines if specified."""
+    if max_lines is None or max_lines <= 0:
+        return text
+    lines = text.splitlines()
+    if len(lines) <= max_lines:
+        return text
+    return "\n".join(lines[:max_lines]) + f"\n... [truncated, {len(lines) - max_lines} more lines]"
+
+
+def _extract_section(content: str, section: str) -> str:
+    """Extract a specific section from SKILL.md content.
+    
+    Sections are identified by markdown headers (## or ###).
+    Common sections: instructions, examples, notes, usage, parameters
+    """
+    lines = content.splitlines()
+    
+    # Skip frontmatter
+    start_idx = 0
+    if lines and lines[0].strip() == "---":
+        for i in range(1, len(lines)):
+            if lines[i].strip() == "---":
+                start_idx = i + 1
+                break
+    
+    # Find section boundaries
+    section_lower = section.lower()
+    section_start = None
+    section_end = None
+    
+    for i in range(start_idx, len(lines)):
+        line = lines[i].strip()
+        # Check for header lines
+        if line.startswith("#"):
+            header_text = line.lstrip("#").strip().lower()
+            if section_start is None:
+                # Looking for section start
+                if section_lower in header_text:
+                    section_start = i
+            else:
+                # Found next section, mark end
+                section_end = i
+                break
+    
+    if section_start is None:
+        # Section not found, return body without frontmatter
+        if section_lower == "instructions":
+            # Default: return everything after frontmatter until first ## header
+            body_lines = []
+            for i in range(start_idx, len(lines)):
+                line = lines[i].strip()
+                if line.startswith("## "):
+                    break
+                body_lines.append(lines[i])
+            return "\n".join(body_lines).strip() or "[No instructions section found]"
+        return f"[Section '{section}' not found]"
+    
+    section_end = section_end or len(lines)
+    return "\n".join(lines[section_start:section_end]).strip()
+
+
 def _summarize_skill(skill) -> dict:
     return {
         "skill_id": skill.skill_id,
@@ -202,15 +264,49 @@ def main() -> None:
         return {"ok": True, "count": len(results), "results": results}
 
     @mcp.tool()
-    def get_skill_details(skill_id: str) -> dict:
+    def get_skill_details(
+        skill_id: str,
+        section: str = "summary",
+        max_lines: int | None = None,
+    ) -> dict:
+        """Get skill details with context compression options.
+        
+        Args:
+            skill_id: Unique identifier of the skill
+            section: What to return - "summary" (default, frontmatter + snippet), 
+                     "instructions" (main instructions only),
+                     "examples" (code examples only),
+                     "full" (complete content)
+            max_lines: Optional line limit for the content
+        """
         _ensure_state_loaded(config, state, state_lock)
         for s in state["scan"].skills:
             if s.skill_id == skill_id:
-                return {
+                content = s.skill_path.read_text(encoding="utf-8")
+                
+                result = {
                     "ok": True,
                     "skill_id": s.skill_id,
-                    "content": s.skill_path.read_text(encoding="utf-8"),
+                    "title": s.frontmatter.title,
+                    "description": s.frontmatter.description,
+                    "tags": list(s.frontmatter.tags),
                 }
+                
+                section_lower = (section or "summary").strip().lower()
+                
+                if section_lower == "summary":
+                    # Just metadata + description snapshot, no full content
+                    result["description_snapshot"] = s.description_snapshot
+                    result["hint"] = "Use section='instructions' or 'full' for complete content"
+                elif section_lower == "full":
+                    result["content"] = _apply_max_lines(content, max_lines)
+                else:
+                    # Extract specific section
+                    extracted = _extract_section(content, section_lower)
+                    result["section"] = section_lower
+                    result["content"] = _apply_max_lines(extracted, max_lines)
+                
+                return result
         return {"ok": False, "error": "skill_not_found", "skill_id": skill_id}
 
     @mcp.tool()

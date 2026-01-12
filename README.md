@@ -14,6 +14,7 @@ A third-party MCP server: Enable all IDEs to access Claude Code Skills capabilit
 - **Skill Details / 技能详情**: Detailed information retrieval for each skill / 每个技能的详细信息检索
 - **Enhanced Import Tools / 增强导入工具**: Advanced import script with configuration files, progress tracking, and robust error handling / 具有配置文件、进度跟踪和健壮错误处理的高级导入脚本
 - **No Bundled Skills in Repo / 仓库不内置 Skills**: This repository does not ship skills by default; put your skills under `~/.claude/skills` or `./.skills` / 本仓库默认不内置 skills，请将 skills 放到 `~/.claude/skills` 或 `./.skills`
+- **Context Compression / 上下文压缩**: Token-friendly skill retrieval with section-based extraction (summary, instructions, examples, full) / 支持按 section 提取技能内容，节省 token 消耗
 
 ## Prerequisites / 先决条件
 
@@ -117,20 +118,35 @@ Returns matching skills with their details / 返回匹配的技能及其详细�
 
 ### 3. get_skill_details / 获取技能详情
 
-Get detailed information about a specific skill / 获取特定技能的详细信息
+Get detailed information about a specific skill with context compression / 获取特定技能的详细信息，支持上下文压缩
 
 **Parameters / 参数:**
 - `skill_id` (required): Unique identifier of the skill / 技能的唯一标识符
+- `section` (optional): What to return / 返回内容类型
+  - `"summary"` (default): Frontmatter + description snapshot (token-friendly) / 仅元数据和描述摘要（节省token）
+  - `"instructions"`: Main instructions section only / 仅主要指令部分
+  - `"examples"`: Code examples section only / 仅代码示例部分
+  - `"full"`: Complete SKILL.md content / 完整内容
+- `max_lines` (optional): Limit output to N lines / 限制输出行数
 
 **Example / 示例:**
 ```json
 {
-  "skill_id": "coding/database/query"
+  "skill_id": "coding/database/query",
+  "section": "summary"
+}
+```
+
+```json
+{
+  "skill_id": "coding/database/query",
+  "section": "instructions",
+  "max_lines": 50
 }
 ```
 
 **Response / 响应:**
-Returns complete skill information including content, tags, and metadata / 返回完整的技能信息，包括内容、标签和元数据
+Returns skill information based on section parameter / 根据 section 参数返回技能信息
 
 ### 4. update_tags / 更新标签
 
