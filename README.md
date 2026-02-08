@@ -175,6 +175,83 @@ Manage tags inside skills frontmatter / 管理 skills 的 frontmatter tags
 **Response / 响应:**
 Returns the current tags list or operation result / 返回当前标签列表或操作结果
 
+### 5. create_new_skill / 创建新技能
+
+Create a new skill with automatic validation and indexing / 创建新技能并自动验证和索引
+
+**Parameters / 参数:**
+- `path` (required): Skill path (e.g., "coding/python-helper" or "simple-skill") / 技能路径
+- `description` (required): Skill description (1-1024 characters) / 技能描述（1-1024字符）
+- `tags` (optional): Array of tags / 标签数组
+- `instructions` (optional): Custom instructions (if not provided, a template will be generated) / 自定义指令（如未提供则生成模板）
+- `license` (optional): License information / 许可证信息
+- `metadata` (optional): Metadata dict (e.g., {"author": "example", "version": "1.0"}) / 元数据字典
+- `create_scripts_dir` (optional): Whether to create scripts/ directory / 是否创建 scripts/ 目录
+- `create_references_dir` (optional): Whether to create references/ directory / 是否创建 references/ 目录
+- `create_assets_dir` (optional): Whether to create assets/ directory / 是否创建 assets/ 目录
+
+**Example / 示例:**
+```json
+{
+  "path": "coding/python-helper",
+  "description": "A helper skill for Python development tasks",
+  "tags": ["python", "coding", "development"],
+  "create_scripts_dir": true
+}
+```
+
+```json
+{
+  "path": "simple-skill",
+  "description": "A simple skill example",
+  "tags": ["example"],
+  "instructions": "## Instructions\n\nDetailed instructions here...",
+  "metadata": {"author": "example-user", "version": "1.0"}
+}
+```
+
+**Response / 响应:**
+Returns creation result with skill path and details / 返回创建结果，包含技能路径和详细信息
+
+**Notes / 注意事项:**
+- Skills are created in the `.skills/` directory / 技能创建在 `.skills/` 目录中
+- Skill names must be lowercase with hyphens only / 技能名称必须是小写字母和连字符
+- Supports category paths (e.g., "coding/python-helper") / 支持分类路径
+- Automatically validates name format and updates index / 自动验证名称格式并更新索引
+
+### 6. delete_existing_skill / 删除现有技能
+
+Delete a user-created skill (requires confirmation) / 删除用户创建的技能（需要确认）
+
+**Parameters / 参数:**
+- `skill_id` (required): Unique identifier of the skill to delete / 要删除的技能的唯一标识符
+- `confirm` (required): Must be True to actually delete (False shows preview only) / 必须为 True 才能实际删除（False 仅显示预览）
+
+**Example / 示例:**
+```json
+{
+  "skill_id": ".skills:coding/python-helper/SKILL.md",
+  "confirm": false
+}
+```
+
+```json
+{
+  "skill_id": ".skills:simple-skill/SKILL.md",
+  "confirm": true
+}
+```
+
+**Response / 响应:**
+Returns deletion result or preview information / 返回删除结果或预览信息
+
+**Safety Features / 安全特性:**
+- Only allows deletion of skills in `.skills/` directory / 仅允许删除 `.skills/` 目录中的技能
+- Cannot delete imported skills (`.skills/imported/`) / 无法删除导入的技能
+- Cannot delete source repository skills (`.skill_cortex_sources/`) / 无法删除源仓库技能
+- Requires explicit `confirm=true` to execute deletion / 需要显式 `confirm=true` 才能执行删除
+- Automatically updates index after deletion / 删除后自动更新索引
+
 ## Configuration / 配置
 
 ### Environment Variables / 环境变量

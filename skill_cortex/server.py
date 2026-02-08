@@ -10,6 +10,7 @@ from skill_cortex.config import AppConfig, load_config
 from skill_cortex.frontmatter import normalize_tags
 from skill_cortex.index_store import load_index, save_index
 from skill_cortex.scanner import scan_skills
+from skill_cortex.skill_manager import create_skill, delete_skill
 from skill_cortex.tags_registry import TagsRegistry, load_tags_registry
 
 
@@ -353,6 +354,93 @@ def main() -> None:
         state["scan"] = scan_skills(config.roots, tags_registry=state["registry"])
         save_index(config.cache_path, state["scan"])
         return {"ok": True, "results": results}
+
+    @mcp.tool()
+    def create_new_skill(
+        path: str,
+        description: str,
+        tags: list[str] | None = None,
+        instructions: str | None = None,
+        license: str | None = None,
+        metadata: dict[str, str] | None = None,
+        create_scripts_dir: bool = False,
+        create_references_dir: bool = False,
+        create_assets_dir: bool = False,
+    ) -> dict:
+        """Create a new skill.
+        
+        Args:
+            path: Skill path (e.g., "coding/python-helper" or "simple-skill")
+            description: Skill description (1-1024 characters)
+            tags: Optional list of tags
+            instructions: Optional custom instructions (if not provided, a template will be generated)
+            license: Optional license information
+            metadata: Optional metadata dict (e.g., {"author": "example", "version": "1.0"})
+            create_scripts_dir: Whether to create scripts/ directory
+            create_references_dir: Whether to create references/ directory
+            create_assets_dir: Whether to create assets/ directory
+            
+        Returns:
+            Result dict with ok status and skill details
+        """
+        _ensure_state_loaded(config, state, state_lock)
+        
+        result = create_skill(
+            roots=config.roots,
+            path=path,
+            description=description,
+            tags=tags,
+            instructions=instructions,
+            license=license,
+            metadata=metadata,
+            create_scripts_dir=create_scripts_dir,
+            create_references_dir=create_references_dir,
+            create_assets_dir=create_assets_dir,
+        )
+        
+        # If successful, rescan and update index
+        if result.get("ok"):
+            state["scan"] = scan_skills(config.roots, tags_registry=state["registry"])
+            save_index(config.cache_path, state["scan"])
+        
+        return result
+
+    @mcp.tool()
+    def delete_existing_skill(
+        skill_id: str,
+        confirm: bool = False,
+    ) -> dict:
+        """Delete a skill (requires confirmation).
+        
+        Only allows deletion of user-created skills in .skills/ directory.
+        Imported skills and source repository skills cannot be deleted.
+        
+        Args:
+            skill_id: Unique identifier of the skill to delete
+            confirm: Must be True to actually delete (False shows preview only)
+            
+        Returns:
+            Result dict with ok status and details
+        """
+        _ensure_state_loaded(config, state, state_lock)
+        
+        # Find the skill
+        skill = next((s for s in state["scan"].skills if s.skill_id == skill_id), None)
+        if skill is None:
+            return {"ok": False, "error": "skill_not_found", "skill_id": skill_id}
+        
+        result = delete_skill(
+            skill_path=skill.skill_path,
+            roots=config.roots,
+            confirm=confirm,
+        )
+        
+        # If successfully deleted, rescan and update index
+        if result.get("ok"):
+            state["scan"] = scan_skills(config.roots, tags_registry=state["registry"])
+            save_index(config.cache_path, state["scan"])
+        
+        return result
 
     mcp.run()
 
